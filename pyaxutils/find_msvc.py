@@ -1,9 +1,13 @@
 import os
-import logging
 import re
 
-import common
-from common import *
+try:
+    from common import debug, logger
+except ImportError:
+    import logging
+    logger = logging.getLogger("find_msvc")
+    debug = logger.debug
+    pass
 
 
 VS_VERS = ["2019", "2017"]

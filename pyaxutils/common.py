@@ -8,7 +8,6 @@ def debug(*args, **kwargs):
 
 
 def info(msg, *args, **kwargs):
-    print("info")
     logger.info(msg, *args, **kwargs)
 
 
