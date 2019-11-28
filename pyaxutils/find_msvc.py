@@ -1,13 +1,9 @@
 import os
 import re
 
-try:
-    from common import debug, logger
-except ImportError:
-    import logging
-    logger = logging.getLogger("find_msvc")
-    debug = logger.debug
-    pass
+
+import logging
+logger = logging.getLogger("find_msvc")
 
 
 VS_VERS = ["2019", "2017"]
@@ -17,36 +13,38 @@ VC_ARCH = ["x86", "x64"]
 
 def find_msvc(vs_vers=VS_VERS,
               vs_install_types=VS_INSTALL_TYPES,
-              vs_arch=VC_ARCH
+              vs_arch=VC_ARCH,
+              logger=logger
               ):
+
     PROGRAMFILES_X86 = os.environ["PROGRAMFILES(X86)"]
 
     msvc = {}
     for vs_ver, vs_install in [(vs_ver, vs_install)
                                for vs_ver in vs_vers
                                for vs_install in vs_install_types]:
-        debug("checking %s(%s) ...", vs_ver, vs_install)
+        logger.debug("checking %s(%s) ...", vs_ver, vs_install)
         vs_install_dir = os.path.join(
             PROGRAMFILES_X86,
             "Microsoft Visual Studio", vs_ver, vs_install, "VC")
         if not os.path.isdir(vs_install_dir):
             continue
-        debug("install found: %s .", vs_install_dir)
+        logger.debug("install found: %s .", vs_install_dir)
 
         vcvarsall_bat = os.path.join(vs_install_dir,
                                      "Auxiliary",
                                      "Build", "vcvarsall.bat")
         if not os.path.isfile(vcvarsall_bat):
-            debug("vcvarsall.bat not found. %s", vcvarsall_bat)
+            logger.debug("vcvarsall.bat not found. %s", vcvarsall_bat)
             continue
         vc_toolset_dir = os.path.join(vs_install_dir,
                                       "Tools",
                                       "MSVC")
         for toolset in os.listdir(vc_toolset_dir):
             if not re.match(r"\d+\.\d+.\d+.", toolset):
-                debug("%s is not avalid toolset dir", toolset)
+                logger.debug("%s is not avalid toolset dir", toolset)
                 continue
-            debug("found toolset: %s", toolset)
+            logger.debug("found toolset: %s", toolset)
             if toolset not in msvc:
                 msvc[toolset] = []
             msvc[toolset].append(
@@ -65,6 +63,7 @@ def find_msvc(vs_vers=VS_VERS,
 
 
 if __name__ == "__main__":
-    logger.setLevel(logging.NOTSET)
+    if logger:
+        logger.setLevel(0)
     print find_msvc()
     pass
